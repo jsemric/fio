@@ -80,9 +80,21 @@ pthread_mutex_t overlap_check = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
 #define JOB_START_TIMEOUT	(5 * 1000)
+#define SIGINT_REPEAT_TIMEOUT_SECONDS 3
 
 static void sig_int(int sig)
 {
+	static unsigned ts = 0;
+	// store timestamp of the first received SIGINT
+	if (ts == 0) {
+		ts = time(NULL);
+	}
+	// hard kill if signal received N seconds after the first SIGINT
+	if (time(NULL) - ts >= SIGINT_REPEAT_TIMEOUT_SECONDS) {
+		perror("\nHard exit\n");
+		fio_terminate_threads_hard(TERMINATE_ALL);
+		exit(128);
+	}
 	if (nr_segments) {
 		if (is_backend)
 			fio_server_got_signal(sig);

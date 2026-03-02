@@ -758,6 +758,7 @@ enum {
 };
 
 extern void fio_terminate_threads(unsigned int, unsigned int);
+extern void fio_terminate_threads_hard(unsigned int);
 extern void fio_mark_td_terminate(struct thread_data *);
 
 /*

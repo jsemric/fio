@@ -297,6 +297,20 @@ void fio_terminate_threads(unsigned int group_id, unsigned int terminate)
 	} end_for_each();
 }
 
+void fio_terminate_threads_hard(unsigned int group_id)
+{
+    pid_t pid = getpid();
+
+    dprint(FD_PROCESS, "hard terminate group_id=%d\n", group_id);
+
+    for_each_td(td) {
+		// if we reached here, child processes are likely hung
+        if (td->pid && pid != td->pid)
+			kill(td->pid, SIGKILL);
+	} end_for_each();
+}
+
+
 int fio_running_or_pending_io_threads(void)
 {
 	int nr_io_threads = 0;
